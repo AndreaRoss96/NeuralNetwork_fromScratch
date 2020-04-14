@@ -1,7 +1,7 @@
 import math, random
 import numpy as np
 
-class NN:
+class NeuralNetwork:
 
     def __init__(self, input_dim=None, output_dim=None, hidden_layers=None, seed=1):
         '''
