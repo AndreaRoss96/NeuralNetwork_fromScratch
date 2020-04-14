@@ -35,12 +35,6 @@ def softmax_deriv(x):
     #(e^i*sum(e^j)) / (sum(e^n))^2)   -- j:[i+1, l] and n:[i, l]
     e_x = np.exp(x - np.max(x))
     return e_x/e_x.sum(axis=0)
-    # res = []
-    # den = (np.sum(np.exp(x)))**2
-    # for elem in x:
-    #     num = np.sum(np.exp(x))-np.exp(elem)
-    #     res.append((np.exp(elem)*num)/(den))
-    # return res
 
 '''
 v COST FUNCTIONS v
@@ -68,8 +62,6 @@ Functions selctors
 
 With the string passed as a value it is possible to get the desired function
 '''
-
-
 def error_function_getter(func):
     options = {
         "mean_squared_error": mean_squared_error,

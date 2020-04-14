@@ -6,7 +6,6 @@ from pandas import DataFrame
 
 
 def main():
-        # Settings
         csv_filename = "C:\\Users\\orazi\\Desktop\\Filippo\\uni\\optimization\\progietto finale\\NuralNetworkGD\\wine.csv"
         hidden_layers = [4] # number of nodes in hidden layers i.e. [layer1, layer2, ...]
         eta = 0.1 # learning rate
@@ -14,6 +13,7 @@ def main():
         n_folds = 4 # number of folds for cross-validation
         seed_crossval = 1 # seed for cross-validation
         seed_weights = 1 # seed for NeuralNetwork weight initialization
+        functions = ["sigmoid", "sigmoid"]
 
         # Read csv data + normalize features
         print("Reading '{}'...".format(csv_filename))
@@ -45,7 +45,7 @@ def main():
         X_train, y_train = X[idx_train], y[idx_train]
         X_valid, y_valid = X[idx_valid], y[idx_valid]
         # Build neural network classifier model and train
-        model = NeuralNetwork(input_dim=d, output_dim=n_classes, hidden_layers=hidden_layers, seed=seed_weights)
+        model = NeuralNetwork(input_dim=d, output_dim=n_classes, hidden_layers=hidden_layers, functions=functions, seed=seed_weights)
         model.fit(X_train, y_train, l_rate=eta, batch_size=5, n_epochs=n_epochs)
 
         # Make predictions for training and test data

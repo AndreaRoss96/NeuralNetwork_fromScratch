@@ -27,3 +27,6 @@ def crossval_folds(N, n_folds, seed=1):
         end = min([(i+1)*N_fold, N])
         idx_folds.append(idx_all_permute[start:end])
     return idx_folds
+
+def dotprod(self, a, b):
+    return sum([a_ * b_ for (a_, b_) in zip(a, b)])

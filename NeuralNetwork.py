@@ -1,5 +1,7 @@
 import math, random
 import numpy as np
+from utils import dotprod
+from functions import activation, derivative
 
 class NeuralNetwork:
 
@@ -9,14 +11,14 @@ class NeuralNetwork:
         while its dimension is stored inside the class.
         The element of the input are passed as a parameter to the feedforward method
         '''
-        if (input_dim is None) or (output_dim is None) or (hidden_layers is None):
+        if (input_dim is None) or (output_dim is None) or (hidden_layers is None) or (len(functions) != len(hidden_layers)+1):
             raise Exception("Invalid arguments!")
         self.input_dim = input_dim # number of input nodes
         self.output_dim = output_dim # number of output nodes
         self.hidden_layers = hidden_layers # array with the number of node of each hidden layer
+        self.functions = functions # list of activation functions
         self.net = self._build_network(seed=seed) # array of arrays of nodes
         self.mean_error = [ 0 for _ in range(len(self.net[-1]))] # array of zeros
-        self.functions # list of activation functions 
 
     '''
     Train and fit the network
@@ -27,7 +29,7 @@ class NeuralNetwork:
         if batch_size != 0:
             batches = [input_val[x:x+batch_size] for x in range(0, len(input_val), batch_size)]
             true_outputs = [output_val[x:x+batch_size] for x in range(0, len(output_val), batch_size)]
-        else: # TODO NON SERVE
+        else:
             batches = [input_val]
             batch_size = len(input_val)
             true_outputs = [output_val]
@@ -58,16 +60,16 @@ class NeuralNetwork:
     '''
     def _build_network(self, seed=1):
         random.seed(seed)
-
         # Create a single dense layer
         def _layer(input_dim, output_dim):
             layer = []
-            for _ in range(output_dim):
+            for i in range(output_dim):
                 weights = [random.random() for _ in range(input_dim)] # list of weights
                 node = {
                     "weights": weights, # each node has the weights coming from the previous layer
                     "a": None,
-                    "d": None
+                    "d": None,
+                    "func" : self.functions[i]
                     }
                 layer.append(node)
             return layer
@@ -81,31 +83,31 @@ class NeuralNetwork:
             for i in range(1, len(self.hidden_layers)):
                 network.append(_layer(self.hidden_layers[i-1], self.hidden_layers[i]))
             network.append(_layer(self.hidden_layers[-1], self.output_dim))
-
         return network
 
     def _feedforward(self, x):
-        active = self._sigmoid
         x_in = x
         for layer in self.net:
             x_out = []
             for node in layer:
-                node["a"] = active(self._dotprod(node['weights'], x_in))
+                active = activation(node['func'])
+                node["a"] = active(dotprod(node['weights'], x_in))
                 x_out.append(node["a"])
             x_in = x_out # set output as next input
         return x_in
 
     def _backpropagation(self, out_ecoded):
-        active_derivative = self._sigmoid_derivative
         n_layers = len(self.net)
         for i in reversed(range(n_layers)):
             if i == n_layers - 1:
                 for j, node in enumerate(self.net[i]):
+                    active_derivative = derivative(node['func'])
                     node['d'] = self.mean_error[j] * active_derivative(node["a"])
             else:
                 # Weighted sum of deltas from upper layer
                 for j, node in enumerate(self.net[i]):
-                    err = sum([node_['weights'][j] * node_['d'] for node_ in self.net[i+1]])
+                    err = sum([upper_node['weights'][j] * upper_node['d'] for upper_node in self.net[i+1]])
+                    active_derivative = derivative(node['func'])
                     node['d'] = err * active_derivative(node["a"])
 
     # updates node['weight']
@@ -119,19 +121,6 @@ class NeuralNetwork:
                     # dw = - learning_rate * (error * active_func) * input
                     node['weights'][j] += - l_rate * node['d'] * input_
 
-    # Dot product
-    def _dotprod(self, a, b):
-        return sum([a_ * b_ for (a_, b_) in zip(a, b)])
-
-    # Sigmoid (activation function)
-    def _sigmoid(self, x):
-        return 1.0/(1.0+math.exp(-x))
-
-    # Sigmoid derivative
-    def _sigmoid_derivative(self, sigmoid):
-        return sigmoid*(1.0-sigmoid)
-
-    # One-hot encoding
     def _output_encoder(self, idx, output_dim):
         x = np.zeros(output_dim, dtype=np.int)
         x[idx] = 1
