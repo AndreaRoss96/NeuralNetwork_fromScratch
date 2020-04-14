@@ -1,8 +1,3 @@
-"""
-
- utils.py  (author: Anson Wong / git: ankonzoid)
-
-"""
 import numpy as np
 import pandas as pd
 
