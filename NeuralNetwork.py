@@ -3,7 +3,7 @@ import numpy as np
 
 class NeuralNetwork:
 
-    def __init__(self, input_dim=None, output_dim=None, hidden_layers=None, seed=1):
+    def __init__(self, input_dim=None, output_dim=None, hidden_layers=None, functions, seed=1):
         '''
         The network is constructed so that it doesn't contain the input layer
         while its dimension is stored inside the class.
@@ -16,6 +16,7 @@ class NeuralNetwork:
         self.hidden_layers = hidden_layers # array with the number of node of each hidden layer
         self.net = self._build_network(seed=seed) # array of arrays of nodes
         self.mean_error = [ 0 for _ in range(len(self.net[-1]))] # array of zeros
+        self.functions # list of activation functions 
 
     '''
     Train and fit the network

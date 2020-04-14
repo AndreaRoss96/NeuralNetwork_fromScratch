@@ -1,8 +1,8 @@
 import numpy as np
-from NN import NN
+from NeuralNetwork import NeuralNetwork
 import utils as utils
 import time
-from pandas import DataFrame 
+from pandas import DataFrame
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
         n_epochs = 400 # number of training epochs
         n_folds = 4 # number of folds for cross-validation
         seed_crossval = 1 # seed for cross-validation
-        seed_weights = 1 # seed for NN weight initialization
+        seed_weights = 1 # seed for NeuralNetwork weight initialization
 
         # Read csv data + normalize features
         print("Reading '{}'...".format(csv_filename))
@@ -45,14 +45,11 @@ def main():
         X_train, y_train = X[idx_train], y[idx_train]
         X_valid, y_valid = X[idx_valid], y[idx_valid]
         # Build neural network classifier model and train
-        model = NN(input_dim=d, output_dim=n_classes, hidden_layers=hidden_layers, seed=seed_weights)
+        model = NeuralNetwork(input_dim=d, output_dim=n_classes, hidden_layers=hidden_layers, seed=seed_weights)
         model.fit(X_train, y_train, l_rate=eta, batch_size=5, n_epochs=n_epochs)
-        # model = NeuralNetwork([13,5,3], ["sigmoid", "sigmoid"])
-        # df = DataFrame(X_train)
-        # model.fit(df, y_train, batch_size=5)
 
         # Make predictions for training and test data
-        
+
         ypred_train = model.predict(X_train)
         #ypred_train = model.predict(df)
         ypred_valid = model.predict(X_valid)
