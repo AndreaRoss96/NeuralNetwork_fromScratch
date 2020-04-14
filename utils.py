@@ -24,5 +24,5 @@ def crossval_folds(N, n_folds, seed=1):
         fold_index.append(permuted_index[start:end])
     return fold_index
 
-def dotprod(self, a, b):
+def dotprod(a, b):
     return sum([a_ * b_ for (a_, b_) in zip(a, b)])

@@ -5,7 +5,7 @@ from functions import activation, derivative
 
 class NeuralNetwork:
 
-    def __init__(self, input_dim=None, output_dim=None, hidden_layers=None, functions, seed=1):
+    def __init__(self, input_dim=None, output_dim=None, hidden_layers=None, functions=None, seed=1):
         '''
         The network is constructed so that it doesn't contain the input layer
         while its dimension is stored inside the class.
@@ -61,15 +61,15 @@ class NeuralNetwork:
     def _build_network(self, seed=1):
         random.seed(seed)
         # Create a single dense layer
-        def _layer(input_dim, output_dim):
+        def _layer(input_dim, output_dim, layer_level):
             layer = []
-            for i in range(output_dim):
+            for _ in range(output_dim):
                 weights = [random.random() for _ in range(input_dim)] # list of weights
                 node = {
                     "weights": weights, # each node has the weights coming from the previous layer
                     "a": None,
                     "d": None,
-                    "func" : self.functions[i]
+                    "func" : self.functions[layer_level]
                     }
                 layer.append(node)
             return layer
@@ -77,12 +77,13 @@ class NeuralNetwork:
         # Stack layers (input -> hidden -> ... -> output)
         network = []
         if len(self.hidden_layers) == 0:
-            network.append(_layer(self.input_dim, self.output_dim))
+            # if there's no hidden layers, the functions build just the output layer
+            network.append(_layer(self.input_dim, self.output_dim, 0))
         else:
-            network.append(_layer(self.input_dim, self.hidden_layers[0]))
+            network.append(_layer(self.input_dim, self.hidden_layers[0], 0))
             for i in range(1, len(self.hidden_layers)):
-                network.append(_layer(self.hidden_layers[i-1], self.hidden_layers[i]))
-            network.append(_layer(self.hidden_layers[-1], self.output_dim))
+                network.append(_layer(self.hidden_layers[i-1], self.hidden_layers[i], i))
+            network.append(_layer(self.hidden_layers[-1], self.output_dim, len(self.hidden_layers)))
         return network
 
     def _feedforward(self, x):
