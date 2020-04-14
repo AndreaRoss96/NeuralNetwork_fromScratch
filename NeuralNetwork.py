@@ -5,7 +5,7 @@ from functions import activation, derivative
 
 class NeuralNetwork:
 
-    def __init__(self, input_dim=None, output_dim=None, hidden_layers=None, functions=None, seed=1):
+    def __init__(self, input_dim=None, hidden_layers=None, output_dim=None, functions=None, seed=1):
         '''
         The network is constructed so that it doesn't contain the input layer
         while its dimension is stored inside the class.
@@ -25,7 +25,7 @@ class NeuralNetwork:
     With the default number of batch it performs a SGD,
     otherwise a bigger batch size means speed up and less precision
     '''
-    def fit(self, input_val, output_val, l_rate=0.5, batch_size = 1, n_epochs=200):
+    def fit(self, input_val, output_val, l_rate=0.1, batch_size = 1, n_epochs=200):
         if batch_size != 0:
             batches = [input_val[x:x+batch_size] for x in range(0, len(input_val), batch_size)]
             true_outputs = [output_val[x:x+batch_size] for x in range(0, len(output_val), batch_size)]
