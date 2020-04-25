@@ -5,7 +5,7 @@ from functions import activation, derivative
 
 class NeuralNetwork:
 
-    def __init__(self, input_dim=None, hidden_layers=None, output_dim=None, functions=None, seed=1):
+    def __init__(self, input_dim=None, hidden_layers=None, output_dim=None, functions=None):
         '''
         The network is constructed so that it doesn't contain the input layer
         while its dimension is stored inside the class.
@@ -17,7 +17,7 @@ class NeuralNetwork:
         self.output_dim = output_dim # number of output nodes
         self.hidden_layers = hidden_layers # array with the number of node of each hidden layer
         self.functions = functions # list of activation functions
-        self.net = self._build_network(seed=seed) # array of arrays of nodes
+        self.net = self._network_factory() # array of arrays of nodes
         self.mean_error = [ 0 for _ in range(len(self.net[-1]))] # array of zeros
 
     '''
@@ -58,8 +58,8 @@ class NeuralNetwork:
     '''
     Build a dense netork layer by layer
     '''
-    def _build_network(self, seed=1):
-        random.seed(seed)
+    def _network_factory(self):
+        random.seed(1) # seed = 1
         # Create a single dense layer
         def _layer(input_dim, output_dim, layer_level):
             layer = []
