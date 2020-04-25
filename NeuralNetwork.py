@@ -65,11 +65,13 @@ class NeuralNetwork:
             layer = []
             for _ in range(output_dim):
                 weights = [random.random() for _ in range(input_dim)] # list of weights
+                gradient = [0 for _ in range(input_dim)]
                 node = {
                     "weights": weights, # each node has the weights coming from the previous layer
                     "a": None,
                     "d": None,
-                    "func" : self.functions[layer_level]
+                    "func" : self.functions[layer_level],
+                    "gradient": gradient
                     }
                 layer.append(node)
             return layer
@@ -120,7 +122,8 @@ class NeuralNetwork:
             for node in layer:
                 for j, input_ in enumerate(inputs):
                     # dw = - learning_rate * (error * active_func) * input
-                    node['weights'][j] += - l_rate * node['d'] * input_
+                    #node['weights'][j] += - l_rate * node['d'] * input_
+                    node['weights'][j] += node["gradient"][j]
 
     def _output_encoder(self, idx, output_dim):
         x = np.zeros(output_dim, dtype=np.int)
