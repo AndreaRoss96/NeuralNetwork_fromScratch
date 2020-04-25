@@ -5,7 +5,7 @@ from functions import activation, derivative
 
 class NeuralNetwork:
 
-    def __init__(self, input_dim=None, hidden_layers=None, output_dim=None, functions=None):
+    def __init__(self, input_dim=None, output_dim=None, hidden_layers=None, functions=None, seed=1):
         '''
         The network is constructed so that it doesn't contain the input layer
         while its dimension is stored inside the class.
@@ -17,7 +17,7 @@ class NeuralNetwork:
         self.output_dim = output_dim # number of output nodes
         self.hidden_layers = hidden_layers # array with the number of node of each hidden layer
         self.functions = functions # list of activation functions
-        self.net = self._network_factory() # array of arrays of nodes
+        self.net = self._build_network(seed=seed) # array of arrays of nodes
         self.mean_error = [ 0 for _ in range(len(self.net[-1]))] # array of zeros
 
     '''
@@ -25,7 +25,7 @@ class NeuralNetwork:
     With the default number of batch it performs a SGD,
     otherwise a bigger batch size means speed up and less precision
     '''
-    def fit(self, input_val, output_val, l_rate=0.1, batch_size = 1, n_epochs=200):
+    def fit(self, input_val, output_val, l_rate=0.5, batch_size = 1, n_epochs=200):
         if batch_size != 0:
             batches = [input_val[x:x+batch_size] for x in range(0, len(input_val), batch_size)]
             true_outputs = [output_val[x:x+batch_size] for x in range(0, len(output_val), batch_size)]
@@ -43,10 +43,12 @@ class NeuralNetwork:
                     for j, node in enumerate(self.net[-1]):
                         err = node["a"] - out_ecoded[j]
                         self.mean_error[j] += err
-                for i in range(len(self.mean_error)):
-                    self.mean_error[i] = self.mean_error[i] / batch_size
-                self._backpropagation(out_ecoded) # update node["d"]
-                self._update_weights(np.mean(x_, axis=0), l_rate) # update node["weight"]
+                    self._backpropagation(out_ecoded) # update node["d"]
+                    self._compute_gradient(x_[i],l_rate)
+
+#                for i in range(len(self.mean_error)):
+#                    self.mean_error[i] = self.mean_error[i] / batch_size
+                self._update_weights(np.mean(x_, axis=0), batch_size) # update node["weight"]
 
     '''
     Predict the value choosing between the max value of of node['a'] in the output layer
@@ -58,8 +60,8 @@ class NeuralNetwork:
     '''
     Build a dense netork layer by layer
     '''
-    def _network_factory(self):
-        random.seed(1) # seed = 1
+    def _build_network(self, seed=1):
+        random.seed(seed)
         # Create a single dense layer
         def _layer(input_dim, output_dim, layer_level):
             layer = []
@@ -99,13 +101,14 @@ class NeuralNetwork:
             x_in = x_out # set output as next input
         return x_in
 
-    def _backpropagation(self, out_ecoded):
+    def _backpropagation(self, out_encoded):
         n_layers = len(self.net)
         for i in reversed(range(n_layers)):
             if i == n_layers - 1:
                 for j, node in enumerate(self.net[i]):
                     active_derivative = derivative(node['func'])
-                    node['d'] = self.mean_error[j] * active_derivative(node["a"])
+                    err = node["a"] - out_encoded[j]
+                    node['d'] = err * active_derivative(node["a"])
             else:
                 # Weighted sum of deltas from upper layer
                 for j, node in enumerate(self.net[i]):
@@ -114,7 +117,18 @@ class NeuralNetwork:
                     node['d'] = err * active_derivative(node["a"])
 
     # updates node['weight']
-    def _update_weights(self, x, l_rate):
+    def _update_weights(self, x, batch_size):
+        for i, layer in enumerate(self.net):
+            if i == 0: inputs = x
+            else: inputs = [node_["a"] for node_ in self.net[i-1]]
+            # Update weights
+            for node in layer:
+                for j in range(len(inputs)):
+                    # dw = - learning_rate * (error * active_func) * input
+                    node['weights'][j] += node["gradient"][j]/batch_size
+                    node["gradient"][j] = 0
+
+    def _compute_gradient(self,x,l_rate):
         for i, layer in enumerate(self.net):
             if i == 0: inputs = x
             else: inputs = [node_["a"] for node_ in self.net[i-1]]
@@ -122,8 +136,7 @@ class NeuralNetwork:
             for node in layer:
                 for j, input_ in enumerate(inputs):
                     # dw = - learning_rate * (error * active_func) * input
-                    #node['weights'][j] += - l_rate * node['d'] * input_
-                    node['weights'][j] += node["gradient"][j]
+                    node['gradient'][j] += - l_rate * node['d'] * input_
 
     def _output_encoder(self, idx, output_dim):
         x = np.zeros(output_dim, dtype=np.int)

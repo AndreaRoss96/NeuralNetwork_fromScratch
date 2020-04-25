@@ -4,13 +4,12 @@ import utils as utils
 import time
 from pandas import DataFrame
 
-
 def main():
         csv_filename = "wine.csv"
         hidden_layers = [4] # number of nodes in hidden layers i.e. [layer1, layer2, ...]
-        n_epochs = 200 # number of training epochs
+        n_epochs = 30 # number of training epochs
         n_folds = 4 # number of folds for cross-validation
-        crossval = 1 # seed for cross-validation
+        crossval = 42 # seed for cross-validation
         functions = ["sigmoid", "sigmoid"] # list of activation functions
         batch_size = 5 # size of the batches
 
@@ -41,6 +40,7 @@ def main():
             acc_train.append(100*np.sum(y_train==ypred_train)/len(y_train))
             acc_valid.append(100*np.sum(y_valid==ypred_valid)/len(y_valid))
 
+
             # Print cross-validation result
             print(" Fold {}/{}: acc_train = {:.2f}%, acc_valid = {:.2f}%".format(i+1, n_folds, acc_train[-1], acc_valid[-1]))
 
@@ -48,5 +48,15 @@ def main():
         print("  -> acc_train_avg = {:.2f}%, acc_valid_avg = {:.2f}%".format(sum(acc_train)/float(len(acc_train)), sum(acc_valid)/float(len(acc_valid))))
 
 
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
+    import warnings
+    warnings.filterwarnings("ignore", category=RuntimeWarning) 
     main()
